@@ -21,19 +21,44 @@ const productRoutes = (io)  => {
 
 const router  = Router()
 
+
 router.get('/products', async (req, res) => {
   try {
-    const products = await productModel.find();
-    res.render('products', { products });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; 
+    const result = await productModel.paginate({}, { page, limit });
+
+    const products = result.docs.map((product) => product.toObject());
+
+    const pages = [];
+    for (let i = 1; i <= result.totalPages; i++) {
+      const pageItem = {
+        number: i,
+        numberPgBar: i,
+        url: `/products?page=${i}`,
+      };
+      pages.push(pageItem);
+    }
+
+    res.render('products', {
+      response: {
+        products,
+        totalPages: result.totalPages,
+        prevPage: result.prevPage,
+        nextPage: result.nextPage,
+        page: result.page,
+        hasPrevPage: result.hasPrevPage,
+        hasNextPage: result.hasNextPage,
+        prevPageUrl: result.hasPrevPage ? `/products?page=${result.prevPage}` : null,
+        nextPageUrl: result.hasNextPage ? `/products?page=${result.nextPage}` : null,
+        pages,
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al obtener los productos');
   }
 });
-
-
-
-
 
   router.get('/', async(req, res) => {
     const datos = await fs.promises.readFile(ArchivoProductos,'utf-8' );
@@ -94,7 +119,7 @@ router.get('/products', async (req, res) => {
       };
       const result = await productModel.paginate(filter, options);
   
-      //  respuesta con el formato requerido
+   
       const response = {
         status: 'success',
         payload: result.docs,
@@ -305,6 +330,32 @@ router.get('/products', async (req, res) => {
     }
   });
   
+
+  router.get('/carts/:cid', async (req, res) => {
+    try {
+      const cartId = req.params.cid;
+  
+      const cart = await cartsModel.findById(cartId).populate('products').lean();
+  
+      if (!cart) {
+        return res.status(404).send('Carrito no encontrado');
+      }
+  
+      res.render('cart', {
+        cart: cart,
+        products: cart.products
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send('Error al obtener el carrito');
+    }
+  });
+  
+
+
+
+
+
   
   return router;
   

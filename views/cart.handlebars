@@ -1,0 +1,19 @@
+<html>
+ <div class="container-fluid">
+    <div class="row">
+        <header class="bg-dark text-white p-3">
+        <h1>Bienvenidos al Ecommerce</h1> 
+         </header>
+    </div>
+</div>
+
+  <body>
+    <h1>Carrito de Compras</h1>
+    <p>Id del carrito: {{cart._id}}</p>
+    <ul>
+      {{#each products}}
+       <li>{{id}} - {{title}} - {{description}} - {{price}} - {{thumbnail}}</li>
+      {{/each}}
+    </ul>
+  </body>
+</html>
