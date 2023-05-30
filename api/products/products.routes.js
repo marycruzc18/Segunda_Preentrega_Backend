@@ -78,16 +78,10 @@ router.get('/products', async (req, res) => {
   });
   
   
-  let productIdCounter = 1;
-
   router.post('/api/products', async (req, res) => {
-    
     try {
       const product = req.body;
-      const newProduct = await productModel.create({
-        ...product,
-        id: productIdCounter++
-      });
+      const newProduct = await productModel.create(product);
       res.status(201).send({ mensaje: 'Producto creado exitosamente' });
     } catch (error) {
       console.error(error);
@@ -144,7 +138,7 @@ router.get('/products', async (req, res) => {
 
     router.get('/api/products/:pid', async (req, res) => {
       try {
-        const product = await productModel.findOne({ id: parseInt(req.params.pid) });
+        const product = await productModel.findById(req.params.pid);
         if (product) {
           res.status(200).send(product);
         } else {
@@ -154,21 +148,23 @@ router.get('/products', async (req, res) => {
         console.error(error);
         res.status(500).send({ mensaje: 'Error al buscar el producto' });
       }
-  });
+    });
+    
   
-  router.put('/api/products/:pid', async (req, res) => {
-    try {
-      const updatedProduct = await productModel.findOneAndUpdate({ id: parseInt(req.params.pid) }, req.body, { new: true });
-      if (updatedProduct) {
-        res.status(200).send({ mensaje: 'Producto actualizado' });
-      } else {
-        res.status(404).send({ mensaje: 'ERROR: No hay producto con ese id, no se puede actualizar' });
+    router.put('/api/products/:pid', async (req, res) => {
+      try {
+        const updatedProduct = await productModel.findByIdAndUpdate(req.params.pid, req.body, { new: true });
+        if (updatedProduct) {
+          res.status(200).send({ mensaje: 'Producto actualizado' });
+        } else {
+          res.status(404).send({ mensaje: 'ERROR: No hay producto con ese id, no se puede actualizar' });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ mensaje: 'Error al actualizar el producto' });
       }
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ mensaje: 'Error al actualizar el producto' });
-    }
-  });
+    });
+    
   
   
   
